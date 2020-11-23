@@ -1,8 +1,311 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0; url=examples/">
-  </head>
-  <body></body>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <title>AFrame Dungeon</title>
+  <script src="js/aframe-master.js"></script>
+  <script src="js/handleEvents.js"></script>
+  <!-- <script src="js/animations.js"></script> -->
+  <script src="js/movement.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/aframe-physics-system.min.js"></script>
+  <script src="js/aframe-extras.min.js"></script>
+  <script>
+
+    if (window.THREE) {
+      window.THREE.ImageLoader.prototype.corssOrigin = ''
+
+    }
+  </script>
+</head>
+
+<body class="a-body">
+  <a-scene debug="" physics="debug: true" class="fullscreen" canvas="" inspector="" keyboard-shortcuts="" screenshot=""
+    vr-mode-ui="" auto-enter-vr="">
+    <a-assets>
+      <img id="ghost" src="resources/IronMan.obj" crossorigin="anonymous" />
+      <a-assets-item id="ironMan" src="resources/IronMan.obj" ccrossorigin="anonymous">&gt;</a-assets-item>
+      <!-- src="https://ucarecdn.com/f6bf9fe3-82b4-43ba-b5b6-a7e308b64c77/" -->
+      <audio id="bg_music" src="resources/bg_music.mp3" preload="auto" ccrossorigin="anonymous">&gt;</audio>
+      <audio id="fx_punch" src="resources/fx_punch.mp3" preload="auto" ccrossorigin="anonymous">&gt;</audio>
+      <audio id="fx_teleport" src="resources/fx_teleport.mp3" preload="auto" ccrossorigin="anonymous">&gt;</audio>
+      <a-asset-items id="casa" src="resources/scene.gltf"></a-asset-items>
+      <img id="atack" src="resources/atack.png" />
+      <img id="defend" src="resources/defender.png" />
+      <img id="evad" src="resources/evad.png" />
+    </a-assets>
+
+    <!-- Teleport Sound -->
+    <a-entity sound="src:#fx_teleport" position="0 0 0" rotation="0 0 0" scale="1 1 1"></a-entity>
+
+    <!-- Teleport System Spheres -->
+    <a-entity id="blueTPSphere" sound="src:#fx_teleport;poolSize:5;volume:0.2" static-movement=""
+      geometry="primitive:sphere;radius:0.2" material="color:blue;roughness:1" position="1.526 2.884 -5.2"
+      rotation="0 0 0" scale="1 1 1"></a-entity>
+    <a-entity id="blueTPSphere-2" sound="src:#fx_teleport;poolSize:5;volume:0.2" static-movement=""
+      geometry="primitive:sphere;radius:0.2" material="color:blue;roughness:1" position="1.464 2.884 7.124"
+      rotation="0 0 0" scale="1 1 1"></a-entity>
+    <a-entity id="blueTPSphere-3" sound="src:#fx_teleport;poolSize:5;volume:0.2" static-movement=""
+      geometry="primitive:sphere;radius:0.2" material="color:blue;roughness:1" position="-5.077 2.884 7.124"
+      rotation="0 0 0" scale="1 1 1"></a-entity>
+    <a-entity id="blueTPSphere-4" sound="src:#fx_teleport;poolSize:5;volume:0.2" static-movement=""
+      geometry="primitive:sphere;radius:0.2" material="color:blue;roughness:1" position="5.395 2.884 7.124"
+      rotation="0 0 0" scale="1 1 1"></a-entity>
+    <a-entity id="blueTPSphere-5" sound="src:#fx_teleport;poolSize:5;volume:0.2" static-movement=""
+      geometry="primitive:sphere;radius:0.2" material="color:blue;roughness:1" position="1.464 2.884 2.571"
+      rotation="0 0 0" scale="1 1 1"></a-entity>
+
+    <!-- Walls -->
+    <a-box id="wall_1" color="grey" width="15" height="5" depth="1" position="-0.215 2.5 10.025"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <a-box id="wall_2" color="grey" width="15" height="5" depth="1" position="14.814 2.5 -4.084"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <a-box id="wall_2-3" color="grey" width="15" height="5" depth="1" position="-14.521 2.5 -10.974"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <a-box id="wall_2-4" color="grey" width="15" height="5" depth="1" position="-14.521 2.5 -2.692"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <a-box id="wall_2-2" color="grey" width="15" height="5" depth="1" position="-0.215 2.5 -10.794"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <a-box id="wall_3" color="grey" width="15" height="5" depth="1" position="3.731 2.5 -2.734"
+      material="color:grey;src:resources/block_wall.png" rotation="0 90 0" static-body="sphereRadius:NaN" scale="1 1 1">
+    </a-box>
+    <a-box id="wall_4" color="grey" width="15" height="5" depth="1" position="-0.949 2.5 0.151"
+      material="color:grey;src:resources/block_wall.png" rotation="0 90 0" static-body scale="0.483 1 1"></a-box>
+    <a-box id="wall_4-2" color="grey" width="15" height="5" depth="1" position="10.063 2.5 -11.486"
+      material="color:grey;src:resources/block_wall.png" rotation="0 90 0" static-body scale="1 1 1"></a-box>
+    <a-box id="wall_5" color="grey" width="10" height="5" depth="1" position="-5.465 2.5 4.268"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 0 0" scale="1 1 1"></a-box>
+    <!-- <a-box id="wall_6" color="grey" width="10" height="5" depth="1" position="-8.246 2.5 4.268"
+      material="color: red" static-body></a-box> -->
+    <a-box id="wall_7" color="grey" width="7" height="5" depth="1" position="7.723 2.099 -0.25"
+      material="color:grey;src:resources/block_wall.png" static-body="sphereRadius:NaN" rotation="0 90 0" scale="1 1 1">
+    </a-box>
+    <a-box id="wall_7-2" color="grey" width="7" height="5" depth="1" position="7.723 2.099 6.777"
+      material="color:grey;src:resources/block_wall.png" static-body="sphereRadius:NaN" rotation="0 90 0" scale="1 1 1">
+    </a-box>
+    <a-box id="wall_8" color="grey" width="7" height="5" depth="1" position="-7.263 2.5 1.29"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 90 0" scale="1 1 1">
+    </a-box>
+    <a-box id="wall_8-2" color="grey" width="7" height="5" depth="1" position="-8.04 2.5 13.258"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 90 0" scale="1 1 1">
+    </a-box>
+    <a-box id="wall_8-3" color="grey" width="7" height="5" depth="1" position="-10.792 2.5 7.723"
+      material="color:grey;src:resources/block_wall.png" static-body rotation="0 90 0" scale="1 1 1">
+    </a-box>
+
+    <!-- Floor. -->
+    <a-entity id="floor" static-body="sphereRadius:NaN" geometry="depth:100;height:0.2;width:100"
+      material="src:resources/stone_floor.png;repeat:50 20;color:#fafafa;metalness:0.2;roughness:0.1" rotation="0 0 0"
+      scale="1 1 1"></a-entity>
+
+    <a-entity id="pointLight" light="angle:0;intensity:1.4;type:hemisphere" position="0 19.399 2.231" rotation="0 0 0"
+      scale="1 1 1"></a-entity>
+    <a-entity light="type:ambient;color:#BBB" position="0 0 0" rotation="0 0 0" scale="1 1 1"></a-entity>
+
+    <!-- Camera. -->
+    <a-entity sound="src:#bg_music; autoplay:true; loop:true; volume:0.05" camera id="player" player="health: 50"
+      userHeight="1.6" universal-controls kinematic-body="radius:0.5" position="1.464 1.572 6">
+
+      <!-- BG Music -->
+      <a-entity sound="src:#bg_music" position="0 0 0" rotation="0 0 0" scale="1 1 1"></a-entity>
+
+      <!-- HP Interface -->
+      <a-entity position="-0.995 0.662 -1.633" material="src:resources/azulfondo.jpg"
+        geometry="primitive:plane;height:3;width:7" text="align:center;color:#fff;value:HP;width:50"
+        id="text-health-player" scale="0.1 0.1 0.1" rotation="0 0 0"></a-entity>
+
+      <!-- Cursor -->
+      <a-entity cursor="" position="0 0 -0.5" geometry="primitive:ring;radiusInner:0.01;radiusOuter:0.016"
+        material="opacity:0.5;shader:flat;transparent:true;color:#ff9" scale="0.8 0.8 0.8" raycaster=""
+        rotation="0 0 0"></a-entity>
+    </a-entity>
+
+    <!-- Sky -->
+    <a-sky material="color:#fafafa;shader:flat;src:resources/skyblack.jpeg;repeat:50 20;metalness:0.2;roughness:0.1"
+      position="0 0 0" rotation="0 0 0" scale="-1 1 1"
+      geometry="primitive:sphere;radius:5000;segmentsWidth:64;segmentsHeight:20"></a-sky>
+
+    <!-- Enemies -->
+    <a-entity sound="src:#fx_punch;poolSize:5" position="-1.964 0.666 -7.96" scale="0.6 0.6 0.6" id="Ghost01" static-body="shape:box;sphereRadius:NaN" 
+    enemy="health:20;id:1" obj-model="obj:resources/UmbreonHighPoly.obj" material="src:resources/Umbreon.png"
+     rotation="-4.411775022507339 90.75651474872241 -2.4637185190625397" visible="true">
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" position="-1.964 0.666 -7.96" static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material=""
+       geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="2.285 10 10" id="1-ui" rotation="0 0 0" scale="1 1 1" visible="true">
+        <a-entity position="-3.215 -7.621 -8.669" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3"
+         text="align:center;value:HP;width:50;color:#fff" id="text-health-1" rotation="0 0 0" scale="0.308 0.327 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-3.462 -9.238 -5.835" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack"
+         geometry="primitive:plane;width:7;height:3" attack-button="tadrgetEntity:#Ghost01" id="text-attack-1" rotation="0 0 0" scale="0.182 0.364 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="-1.799 -9.05 -5.402" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend" 
+        attack-button="targetEntity:#Ghost02" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="0.139 0.218 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="-0.146 -9.23 -5.791" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" 
+        geometry="primitive:plane;width:7;height:3" attack-button="targetEntity:#Ghost03" id="text-evad-1" rotation="0 0 0" scale="0.135 0.281 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity><a-entity sound="src:#fx_punch;poolSize:5" position="1.255 0.666 2.836" scale="0.6 0.6 0.6" id="Ghost02" static-body="shape:box;sphereRadius:NaN"
+     enemy="health:20;id:2"
+     obj-model="obj:resources/UmbreonHighPoly.obj" material="src:resources/Umbreon.png"  visible="true">
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" position="1.255 0.666 2.836" static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material="" 
+      geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="2.285 10 10" id="2-ui" rotation="0 0 0" scale="1 1 1" visible="true">
+        <a-entity position="-3.215 -7.621 -8.669" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3"
+         text="align:center;value:HP;width:50;color:#fff" id="text-health-2" rotation="0 0 0" scale="0.308 0.327 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-3.462 -9.238 -5.835" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack" 
+        geometry="primitive:plane;width:7;height:3" attack-button="tadrgetEntity:#Ghost01" id="text-attack-1" rotation="0 0 0" scale="0.182 0.364 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="-1.799 -9.05 -5.402" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend"
+         attack-button="targetEntity:#Ghost02" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="0.139 0.218 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="-0.146 -9.23 -5.791" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" 
+        geometry="primitive:plane;width:7;height:3" attack-button="targetEntity:#Ghost03" id="text-evad-1" rotation="0 0 0" scale="0.135 0.281 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity>
+
+
+    <a-entity sound="src:#fx_punch;poolSize:5" posation="1.351 0 -5" scale="0.1 0.1 0.1" rotation="80.61516177490682 -90.01166961505233 -162.7773095966669" id="Ghost03" static-body="shape:box;sphereRadius:NaN" 
+    enemy="health:20;id:3" obj-model="obj:resources/BR_Charizard.obj" material="src:resources/Umbreon.png" position="-9.304 0 6.732" visible="true">
+
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" posation="1.351 0 -5" static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material="" geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="22.655 3.599 39.378" id="3-ui" rotation="-70.0154425649866 31.455382952682196 -20.97025530178813" scale="3.253 5.982 1" visible="true">
+        <a-entity position="0.562 12.476 -0.491" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3" text="align:center;value:HP ;width:50;color:#fff" 
+        id="text-health-3" rotation="-0.8021409131831525 -0.8021409131831525 -5.042028597151244" scale="0.419 0.361 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-8.208 10.227 -2.274" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack" 
+        geometry="primitive:plane;width:7;height:3" attack-button="tadrgetEntity:#Ghost01" id="text-attack-1" rotation="0 0 0" scale="0.437 0.358 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="-2.46 10.111 -1.605" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend" 
+        attack-button="targetEntity:#Ghost02" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="0.418 0.513 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="2.015 9.464 -0.655" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" 
+        geometry="primitive:plane;width:7;height:3" attack-button="targetEntity:#Ghost03" id="text-evad-1" rotation="0 0 0" scale="0.465 0.572 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity>
+
+    <a-entity sound="src:#fx_punch;poolSize:5" position="7.849 0.146 -11.803" scale="0.1 0.1 0.1" id="Ghost04" static-body="shape:box"
+     enemy="health:20;id:4" obj-model="obj:resources/ghost.obj" material="src:resources/Umbreon.png" rotation="0 0 0" visible="true">
+
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" position="7.849 0.146 -11.803" static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material="" geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="2 10 10" id="4-ui" rotation="0 0 0" scale="1 1 1" visible="true">
+        <a-entity position="0 10 0" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3" text="align:center;value:HP;width:50;color:#fff"
+         id="text-health-4" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack" geometry="primitive:plane;width:7;height:3" 
+        attack-button="tadrgetEntity:#Ghost02" id="text-attack-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="0 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend" 
+        attack-button="targetEntity:#Ghost04" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="1 1 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" geometry="primitive:plane;width:7;height:3" 
+        attack-button="targetEntity:#Ghost03" id="text-evad-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity><a-entity sound="src:#fx_punch;poolSize:5" position="-12.196 0.146 -9.236" scale="0.1 0.1 0.1" id="Ghost05" static-body="shape:box" 
+    enemy="health:20;id:5" obj-model="obj:resources/ghost.obj" material="src:resources/Umbreon.png" rotation="0 86.91769752134587 0" visible="true">
+
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" position="-12.196 0.146 -9.236" s static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material="" geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="2 10 10" id="5-ui" rotation="0 0 0" scale="1 1 1" visible="true">
+        <a-entity position="0 10 0" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3" text="align:center;value:HP;width:50;color:#fff" 
+        id="text-health-5" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack" geometry="primitive:plane;width:7;height:3"
+         attack-button="tadrgetEntity:#Ghost03" id="text-attack-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="0 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend"
+         attack-button="targetEntity:#Ghost05" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="1 1 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" geometry="primitive:plane;width:7;height:3"
+         attack-button="targetEntity:#Ghost04" id="text-evad-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity><a-entity sound="src:#fx_punch;poolSize:5" position="5.481 0.146 -0.466" scale="0.1 0.1 0.1" id="Ghost06" static-body="shape:box" 
+    enemy="health:20;id:6" obj-model="obj:resources/ghost.obj" material="src:resources/Umbreon.png" rotation="0 0 0" visible="true">
+
+      <!-- Bounding Box -->
+      <a-box width="2" height="5" depth="3" position="5.481 0.146 -0.466" static-body="" visible="false" rotation="0 0 0" scale="1 1 1" material="" geometry="primitive:box;width:2;height:5;depth:3"></a-box>
+
+      <!-- Punch Sound -->
+      <a-entity sound="src:#fx_punch" position="0 0 0" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+
+      <!-- UI -->
+      <a-entity position="2 10 10" id="6-ui" rotation="0 0 0" scale="1 1 1" visible="true">
+        <a-entity position="0 10 0" material="src:resources/azulfondo.jpg" geometry="primitive:plane;width:7;height:3" text="align:center;value:HP;width:50;color:#fff"
+         id="text-health-6" rotation="0 0 0" scale="1 1 1" visible="true"></a-entity>
+
+        <a-image src="#atack" position="-10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#atack" geometry="primitive:plane;width:7;height:3" 
+        attack-button="tadrgetEntity:#Ghost06" id="text-attack-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+
+        <a-image src="#defend" position="0 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#defend"
+         attack-button="targetEntity:#Ghost04" geometry="primitive:plane;width:7;height:3" id="text-defend-1" rotation="0 0 0" scale="1 1 1" visible="true"></a-image>
+
+        <a-image src="#evad" position="10 -2 0" material="color:lightgrey;shader:flat;side:double;transparent:true;src:#evad" geometry="primitive:plane;width:7;height:3"
+         attack-button="targetEntity:#Ghost05" id="text-evad-1" rotation="0 0 0" scale="1 1 1" visible="true">
+        </a-image>
+
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+
+</body>
+
 </html>
